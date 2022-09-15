@@ -32,7 +32,7 @@ Adafruit_ADT7410 tempsensor = Adafruit_ADT7410();
 
 #include <Adafruit_MotorShield.h>
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
-Adafruit_DCMotor *myMotor = AFMS.getMotor(1);
+Adafruit_DCMotor *myMotor = AFMS.getMotor(3);
 
 
 
@@ -49,6 +49,7 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 
 
 // MiniTFT End
+
 
 boolean LEDOn = false; // State of Built-in LED true=on, false=off.
 #define LOOPDELAY 100
@@ -138,12 +139,14 @@ void setup() {
   // Use this initializer (uncomment) if you're using a 0.96" 180x60 TFT
   tft.initR(INITR_MINI160x80);   // initialize a ST7735S chip, mini display
 
-  tft.setRotation(1);
+  tft.setRotation(3);
   tft.fillScreen(ST77XX_BLACK);
 
   // MiniTFT End
 
   pinMode(LED_BUILTIN, OUTPUT);
+
+AFMS.begin(); // Motor Shield Start
 
 }
 
@@ -151,7 +154,7 @@ void loop() {
 
   builtinLED();
   updateTemperature();
-  autoFan(20.0);
+  autoFan(25.0);
   delay(LOOPDELAY); // To allow time to publish new code.
 }
 
@@ -210,7 +213,7 @@ void updateTemperature() {
   delay(100);
 }
 
-void autofan(float temperatureThreshold) {
+void autoFan(float temperatureThreshold) {
 float c = tempsensor.readTempC();
 myMotor->setSpeed(100);
 if (c < temperatureThreshold) {
