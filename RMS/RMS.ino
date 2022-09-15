@@ -31,8 +31,15 @@ Adafruit_ADT7410 tempsensor = Adafruit_ADT7410();
 // Temperature END
 
 #include <Adafruit_MotorShield.h>
-Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
+Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *myMotor = AFMS.getMotor(3);
+
+// ESP32Servo Start
+#include <ESP32Servo.h>
+Servo myservo;  // create servo object to control a servo
+int servoPin = 12;
+boolean blindsOpen = false;
+// ESP32Servo End
 
 
 
@@ -146,7 +153,16 @@ void setup() {
 
   pinMode(LED_BUILTIN, OUTPUT);
 
-AFMS.begin(); // Motor Shield Start
+  AFMS.begin(); // Motor Shield Start
+
+  // ESP32Servo Start
+  ESP32PWM::allocateTimer(0);
+  ESP32PWM::allocateTimer(1);
+  ESP32PWM::allocateTimer(2);
+  ESP32PWM::allocateTimer(3);
+  myservo.setPeriodHertz(50);    // standard 50 hz servo
+  myservo.attach(servoPin, 1000, 2000); // attaches the servo on pin 18 to the servo object
+  // ESP32Servo End
 
 }
 
@@ -155,6 +171,7 @@ void loop() {
   builtinLED();
   updateTemperature();
   autoFan(25.0);
+  windowBlinds();
   delay(LOOPDELAY); // To allow time to publish new code.
 }
 
@@ -214,13 +231,26 @@ void updateTemperature() {
 }
 
 void autoFan(float temperatureThreshold) {
-float c = tempsensor.readTempC();
-myMotor->setSpeed(100);
-if (c < temperatureThreshold) {
-  myMotor->run(RELEASE);
-}else{
-  myMotor->run(FORWARD);
+  float c = tempsensor.readTempC();
+  myMotor->setSpeed(100);
+  if (c < temperatureThreshold) {
+    myMotor->run(RELEASE);
+  } else {
+    myMotor->run(FORWARD);
 
- }
+  }
 
+
+
+}
+void windowBlinds() {
+  uint32_t buttons = ss.readButtons();
+  if (! (buttons & TFTWING_BUTTON_A)) {
+    if (blindsOpen) {
+      myservo.write(0);
+    } else {
+      myservo.write(180);
+    }
+    blindsOpen = !blindsOpen;
+  }
 }
