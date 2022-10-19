@@ -199,7 +199,6 @@ void loop() {
 
   builtinLED();
   updateTemperature();
-  automaticFan(25.0);
   fanControl();
   windowBlinds();
   readRFID();
